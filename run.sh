@@ -1,7 +1,7 @@
 #!/bin/bash
 
 container=opengl
-image=thewtex/opengl
+image=gilureta/opengl
 port=6080
 extra_run_args=""
 quiet=""
@@ -74,24 +74,12 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-os=$(uname)
-if [ "${os}" != "Linux" ]; then
-	vm=$(docker-machine active 2> /dev/null || echo "default")
-	if ! docker-machine inspect "${vm}" &> /dev/null; then
-		if [ -z "$quiet" ]; then
-			echo "Creating machine ${vm}..."
-		fi
-		docker-machine -D create -d virtualbox --virtualbox-memory 2048 ${vm}
-	fi
-	docker-machine start ${vm} > /dev/null
-    eval $(docker-machine env $vm --shell=sh)
-fi
-
-ip=$(docker-machine ip ${vm} 2> /dev/null || echo "localhost")
+ip="localhost"
 url="http://${ip}:$port"
 
 cleanup() {
-	docker stop $container >/dev/null
+	echo "cleanup"
+    docker stop $container >/dev/null
 	docker rm $container >/dev/null
 }
 
@@ -114,11 +102,6 @@ if [ -z "$quiet" ]; then
 	fi
 fi
 
-pwd_dir="$(pwd)"
-mount_local=""
-if [ "${os}" = "Linux" ] || [ "${os}" = "Darwin" ]; then
-	mount_local=" -v ${pwd_dir}:/home/user/work "
-fi
 port_arg=""
 if [ -n "$port" ]; then
 	port_arg="-p $port:6080"
@@ -127,10 +110,9 @@ fi
 docker run \
   -d \
   --name $container \
-  ${mount_local} \
   $port_arg \
   $extra_run_args \
-  $image >/dev/null
+  $image
 
 print_app_output() {
 	docker cp $container:/var/log/supervisor/graphical-app-launcher.log - \

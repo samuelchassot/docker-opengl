@@ -1,7 +1,8 @@
-FROM dockcross/base:latest
-MAINTAINER Matt McCormick <matt.mccormick@kitware.com>
+FROM ubuntu:16.04
+#FROM dockcross/base:latest
+#MAINTAINER Matt McCormick <matt.mccormick@kitware.com>
 
-ENV DEFAULT_DOCKCROSS_IMAGE thewtex/opengl
+#ENV DEFAULT_DOCKCROSS_IMAGE thewtex/opengl
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   git \
@@ -13,6 +14,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   sudo \
   supervisor \
   tint2 \
+  wget \
   x11-xserver-utils \
   x11vnc \
   xinit \
