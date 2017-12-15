@@ -1,20 +1,21 @@
 #!/bin/bash
-
 container=opengl
-image=gilureta/opengl
+image=gilureta/opengl:ubuntu16.04
 port=6080
 extra_run_args=""
+extra_docker_args=""
 quiet=""
+use_vm=""
 
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-h] [-q] [-c CONTAINER] [-i IMAGE] [-p PORT] [-r DOCKER_RUN_FLAGS]
+Usage: ${0##*/} [-h] [-q] [-m] [-c CONTAINER] [-i IMAGE] [-p PORT] [-r DOCKER_RUN_FLAGS] [-d DOCKER_RUN_ARGS]
 
 This script is a convenience script to run Docker images based on
 thewtex/opengl. It:
 
 - Makes sure docker is available
-- On Windows and Mac OSX, creates a docker machine if required
+- On Windows and Mac OSX, creates a docker machine if asked (flag -d)
 - Informs the user of the URL to access the container with a web browser
 - Stops and removes containers from previous runs to avoid conflicts
 - Mounts the present working directory to /home/user/work on Linux and Mac OSX
@@ -23,8 +24,9 @@ thewtex/opengl. It:
 
 Options:
 
-  -h             Display this help and exit.
+  -h             Display this help and exit.	
   -c             Container name to use (default ${container}).
+  -m             Run docker virtual machine.
   -i             Image name (default ${image}).
   -p             Port to expose HTTP server (default ${port}). If an empty
                  string, the port is not exposed.
@@ -52,12 +54,19 @@ while [ $# -gt 0 ]; do
 			port=$2
 			shift
 			;;
+		-d)
+			extra_docker_args="$extra_docker_args $2"
+			shift
+			;;
 		-r)
 			extra_run_args="$extra_run_args $2"
 			shift
 			;;
 		-q)
 			quiet=1
+			;;
+		-m)
+			use_vm=1
 			;;
 		*)
 			show_help >&2
@@ -74,7 +83,21 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-ip="localhost"
+os=$(uname)
+
+if [ "${os}" != "Linux" ] && [ ! -z $use_vm ]; then
+	vm=$(docker-machine active 2> /dev/null || echo "default")
+	if ! docker-machine inspect "${vm}" &> /dev/null; then
+		if [ -z "$quiet" ]; then
+			echo "Creating machine ${vm}..."
+		fi
+		docker-machine -D create -d virtualbox --virtualbox-memory 2048 ${vm}
+	fi
+	docker-machine start ${vm} > /dev/null
+    eval $(docker-machine env $vm --shell=sh)
+fi
+
+ip=$(docker-machine ip ${vm} 2> /dev/null || echo "localhost")
 url="http://${ip}:$port"
 
 cleanup() {
@@ -110,23 +133,16 @@ fi
 docker run \
   -d \
   --name $container \
+  --mount type=bind,source="$(pwd)",target=/workspace \
   $port_arg \
-  $extra_run_args \
-  $image
-
-print_app_output() {
-	docker cp $container:/var/log/supervisor/graphical-app-launcher.log - \
-		| tar xO
-	result=$(docker cp $container:/tmp/graphical-app.return_code - \
-		| tar xO)
-	cleanup
-	exit $result
-}
+  $extra_docker_args \
+  $image \
+  $extra_run_args
 
 trap "docker stop $container >/dev/null && print_app_output" SIGINT SIGTERM
+docker exec -it $container bash
 
-docker wait $container >/dev/null
+echo "Stopping container $container (it might take a while)"
+docker stop $container > /dev/null 
 
-print_app_output
-
-# vim: noexpandtab shiftwidth=4 tabstop=4 softtabstop=0
+cleanup
