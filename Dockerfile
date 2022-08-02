@@ -1,30 +1,36 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 #FROM dockcross/base:latest
 #MAINTAINER Matt McCormick <matt.mccormick@kitware.com>
 
 #ENV DEFAULT_DOCKCROSS_IMAGE thewtex/opengl
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  git \
-  libgl1-mesa-dri \
-  menu \
-  net-tools \
-  openbox \
-  python-pip \
-  sudo \
-  supervisor \
-  tint2 \
-  wget \
-  x11-xserver-utils \
-  x11vnc \
-  xinit \
-  xserver-xorg-video-dummy \
-  xserver-xorg-input-void \
-  websockify && \
-  rm -f /usr/share/applications/x11vnc.desktop && \
-  apt-get remove -y python-pip && \
+RUN apt-get update --fix-missing
+RUN apt-get install -y apt-utils
+RUN apt-get install -y software-properties-common  
+RUN add-apt-repository universe 
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y 
+RUN apt-get install -y git 
+RUN apt-get install -y libgl1-mesa-dri 
+RUN apt-get install -y menu 
+RUN apt-get install -y net-tools 
+RUN apt-get install -y openbox 
+RUN apt-get install -y python3.9 
+RUN apt-get install -y python3-pip 
+RUN apt-get install -y sudo 
+RUN apt-get install -y supervisor 
+RUN apt-get install -y tint2 
+RUN apt-get install -y wget 
+RUN apt-get install -y x11-xserver-utils 
+RUN apt-get install -y x11vnc 
+RUN apt-get install -y xinit 
+RUN apt-get install -y xserver-xorg-video-dummy 
+RUN apt-get install -y xserver-xorg-input-void 
+RUN apt-get install -y websockify
+RUN rm -f /usr/share/applications/x11vnc.desktop && \
+  apt-get remove -y python3-pip && \
   wget https://bootstrap.pypa.io/get-pip.py && \
-  python get-pip.py && \
+  python3 get-pip.py && \
   pip install supervisor-stdout && \
   apt-get -y clean
 
@@ -61,8 +67,8 @@ ARG IMAGE
 ARG VCS_REF
 ARG VCS_URL
 LABEL org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.name=$IMAGE \
-      org.label-schema.description="An image based on debian/jessie containing an X_Window_System which supports rendering graphical applications, including OpenGL apps" \
-      org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url=$VCS_URL \
-      org.label-schema.schema-version="1.0"
+  org.label-schema.name=$IMAGE \
+  org.label-schema.description="An image based on debian/jessie containing an X_Window_System which supports rendering graphical applications, including OpenGL apps" \
+  org.label-schema.vcs-ref=$VCS_REF \
+  org.label-schema.vcs-url=$VCS_URL \
+  org.label-schema.schema-version="1.0"
