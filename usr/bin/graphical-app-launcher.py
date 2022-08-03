@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -7,13 +7,15 @@ import sys
 import signal
 
 if __name__ == '__main__':
-    if os.environ.has_key('APP'):
-        graphical_app = os.environ['APP']
-        if os.environ.has_key('ARGS'):
+    if "APP_COMMAND" in os.environ.keys():
+        graphical_app = os.environ['APP_COMMAND']
+        if "ARGS" in os.environ.keys():
             extra_args = os.environ['ARGS']
             command = graphical_app + ' ' + extra_args
         else:
             command = graphical_app
+        
+        print("Running the app with the command: " + command)
 
         process = subprocess.Popen(command, shell=True,
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

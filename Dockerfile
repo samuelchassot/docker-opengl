@@ -69,7 +69,7 @@ RUN apt-get install -y freeglut3-dev
 RUN apt-get install -y python3.9 python3-pip
 RUN python3.9 -m pip install pyglet
 
-ENV APP "/examples/pyglet/pyglet_test.py"
+ENV APP_COMMAND "python3.9 /examples/pyglet/pyglet_test.py"
 
 # APP Specific part ------------------------------------------------------------------------------------------------
 
