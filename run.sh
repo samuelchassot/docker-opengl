@@ -1,6 +1,6 @@
 #!/bin/bash
 container=opengl
-image=gilureta/opengl:ubuntu16.04
+image=docker_opengl:ubuntu20.04
 port=6080
 extra_run_args=""
 extra_docker_args=""
@@ -139,10 +139,10 @@ docker run \
   $image \
   $extra_run_args
 
-trap "docker stop $container >/dev/null && print_app_output" SIGINT SIGTERM
-docker exec -it $container bash
+# trap "docker stop $container >/dev/null && print_app_output" SIGINT SIGTERM
+# docker exec -it $container bash
 
-echo "Stopping container $container (it might take a while)"
-docker stop $container > /dev/null 
+# echo "Stopping container $container (it might take a while)"
+# docker stop $container > /dev/null 
 
-cleanup
+# cleanup
