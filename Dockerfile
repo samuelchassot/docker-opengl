@@ -1,15 +1,19 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 #FROM dockcross/base:latest
 #MAINTAINER Matt McCormick <matt.mccormick@kitware.com>
 
 #ENV DEFAULT_DOCKCROSS_IMAGE thewtex/opengl
+
+ENV TZ=Europe/Zurich
+ENV DEBIAN_FRONTEND=noninteractive
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update --fix-missing
 RUN apt-get install -y apt-utils
 RUN apt-get install -y software-properties-common  
 RUN add-apt-repository universe 
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y 
+RUN apt-get update
 RUN apt-get install -y git 
 RUN apt-get install -y libgl1-mesa-dri 
 RUN apt-get install -y menu 
@@ -24,8 +28,8 @@ RUN apt-get install -y wget
 RUN apt-get install -y x11-xserver-utils 
 RUN apt-get install -y x11vnc 
 RUN apt-get install -y xinit 
+RUN apt-get install -y xserver-xorg-core
 RUN apt-get install -y xserver-xorg-video-dummy 
-RUN apt-get install -y xserver-xorg-input-void 
 RUN apt-get install -y websockify
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 3 && \
   rm -f /usr/share/applications/x11vnc.desktop && \
