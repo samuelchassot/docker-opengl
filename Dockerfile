@@ -27,12 +27,13 @@ RUN apt-get install -y xinit
 RUN apt-get install -y xserver-xorg-video-dummy 
 RUN apt-get install -y xserver-xorg-input-void 
 RUN apt-get install -y websockify
-RUN rm -f /usr/share/applications/x11vnc.desktop && \
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 3 && \
+  rm -f /usr/share/applications/x11vnc.desktop && \
+  pip3 install git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e && \
   apt-get remove -y python3-pip && \
-  wget https://bootstrap.pypa.io/get-pip.py && \
-  python3 get-pip.py && \
-  pip install supervisor-stdout && \
-  apt-get -y clean
+  apt-get autoremove -y && \
+  apt-get -y clean autoclean && \
+  rm -rf /var/lib/apt/lists/*
 
 COPY etc/skel/.xinitrc /etc/skel/.xinitrc
 
@@ -55,9 +56,13 @@ EXPOSE 6080 5900
 COPY etc /etc
 COPY usr /usr
 
+COPY examples/pyglet/pyglet_test.py /examples/pyglet/pyglet_test.py
+
 ENV DISPLAY :0
 
 WORKDIR /root
+
+ENV APP "/examples/pyglet/pyglet_test.py"
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
